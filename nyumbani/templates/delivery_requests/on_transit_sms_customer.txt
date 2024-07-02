@@ -1,0 +1,5 @@
+Hello {{ recipient.first_name }}. Your order({{ del_request.order_number }}) is on it's way to you.
+Your courier is {{ rider.full_name }}({{ rider.phone_number }}). To receive confirm that you have received your package please share this code {{ confirmation_code }} with the courier.
+
+ZOLONI TEAM.
+Call {{ customer_care_phone }} for queries.

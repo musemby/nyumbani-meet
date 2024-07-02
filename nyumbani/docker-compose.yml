@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  pg:
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    image: mdillon/postgis:10
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8070"
+    volumes:
+      - .:/src
+    ports:
+      - "7171:7171"
+    depends_on:
+      - pg
+
+# TODO - automate pg users and db creation
+# create role sasdef with password 'sasdef_pass'
+# alter user sasdef with login ;
+# create database sasdef
+# initial set up using provisioners e.g terraform
