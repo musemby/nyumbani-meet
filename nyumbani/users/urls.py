@@ -12,12 +12,8 @@ router.register(r'groups', views.GroupViewSet, basename='groups')
 router.register(r'permissions', views.PermissionViewSet, basename='permissions')
 
 urlpatterns = [
-    path('register/', views.register),
-    path('login/', views.login),
-    path('me/', views.me),
-    path('token/', views.token),
-    path('token/refresh/', views.refresh_token),
-    path('token/revoke/', views.revoke_token),
+    path('nyumani_core/login/', views.login, name='login'),
+    path('nyumani_core/password_reset/', views.password_reset, name='password_reset'),
 ]
 
 urlpatterns += router.urls

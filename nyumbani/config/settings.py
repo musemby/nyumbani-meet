@@ -198,8 +198,8 @@ TEMPLATES = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.TokenAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
         # 'zoloni.oauth2.OAuth2ClientCredentialAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
@@ -420,3 +420,11 @@ FOREST = {
 APPEND_SLASH=False
 
 PLACE_HOLDER_PRODUCT_IMG_URL = os.getenv('PLACE_HOLDER_PRODUCT_IMG_URL', 'url')
+
+# ###########################################
+# Nyumbani core settings
+# ###########################################
+
+NYUMBANI_CORE_URL = os.getenv('NYUMBANI_CORE_URL', 'http://localhost:4000')
+NYUMBANI_LOGIN_URL = f'{NYUMBANI_CORE_URL}/api/v1/login/'
+NYUMBANI_PASSWORD_RESET_URL = f'{NYUMBANI_CORE_URL}/api/v1/password-reset/'

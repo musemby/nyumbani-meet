@@ -23,13 +23,9 @@ BOOLEAN_OPTIONS = (
 class UserManager(BaseUserManager):
 
     def create_user(self, **fields):
-        # import pdb; pdb.set_trace()
         user_fields = copy.copy(fields)
-        password = user_fields.pop('password')
         user = self.model(**user_fields)
-        user.set_password(password)
         user.is_active = True
-        user.temp_pwd = password
         user.save(using=self._db)
 
         return user
@@ -44,47 +40,31 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
 
-    id = models.AutoField(primary_key=True)
-    display_name = models.CharField(max_length=255)
-    email = models.EmailField(unique=True, max_length=255)
-    phone_number = PhoneNumberField()
-    business_name = models.CharField(max_length=15, null=True, blank=True)
-    location = models.TextField(null=True, blank=True)
-    email_verified = models.BooleanField(default=False)
-    facebook = models.CharField(max_length=255, null=True, blank=True)
-    instagram = models.CharField(max_length=255, null=True, blank=True)
-    tiktok = models.CharField(max_length=255, null=True, blank=True)
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True)
+    name = models.CharField(max_length=255)
+    email = models.EmailField(max_length=255, null=True, blank=True)
+    phone_number = PhoneNumberField(unique=True)
+    house_number = models.CharField(max_length=15, null=True, blank=True)
+    gender = models.CharField(max_length=255, choices=GENDER_CHOICES, null=True, blank=True)
+    occupation = models.CharField(max_length=255, null=True, blank=True)
+    id_number = models.CharField(max_length=255, null=True, blank=True)
+    kra_pin = models.CharField(max_length=255, null=True, blank=True)
+    password_reset_at = models.DateTimeField(null=True, blank=True)
+    nyumbani_role = models.CharField(max_length=255, null=True, blank=True)
+    nyumbani_active = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False, null=True, blank=True)
-    dob = models.DateTimeField(null=True, blank=True)
-    gender = models.CharField(max_length=255, choices=GENDER_CHOICES, null=True, blank=True)
-    temp_pwd = models.CharField(max_length=255, null=True, blank=True)
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'email'
-
-    @property
-    def profile_id(self):
-        return self.profile.id
-
-    @property
-    def interested_in(self):
-        return self.profile.interested_in
-
-    @property
-    def experienced_seller(self):
-        return self.profile.experienced_seller
-
-    @property
-    def weekly_target(self):
-        return self.profile.weekly_target
+    USERNAME_FIELD = 'phone_number'
 
 
-class UserProfile(models.Model):
+class NyumbaniUserSession(models.Model):
 
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='nyumbani_user_sessions')
+    nyumbani_token = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
