@@ -1,7 +1,7 @@
-from nyumbani.users.views.nyumani_core import login, password_reset
+from users.views.nyumani_core import login, password_reset
 
 
 __all__ = [
-    'login',
-    'password_reset',
+    "login",
+    "password_reset",
 ]

@@ -4,7 +4,6 @@ from common.models import AbstractBase
 
 
 class Organization(AbstractBase):
-
     name = models.CharField(max_length=255)
     email = models.EmailField(max_length=255, null=True, blank=True)
     phone_number = models.CharField(max_length=15, null=True, blank=True)
@@ -16,5 +15,11 @@ class Organization(AbstractBase):
 
 
 class AbstractOrganizationModel(AbstractBase):
-
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+
+    class Meta:
+        abstract = True
+
+
+class UserOrganization(AbstractOrganizationModel):
+    user = models.ForeignKey("users.User", on_delete=models.CASCADE)

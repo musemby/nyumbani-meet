@@ -6,14 +6,15 @@ from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import response, permissions, serializers, status
-from nyumbani.users.serializers import (
+from users.serializers import (
     NyumbaniUserSerializer,
     NyumbaniLoginSerializer,
-    UserSerializer
+    UserSerializer,
 )
 
 
-@api_view(['POST'])
+@api_view(["POST"])
+@permission_classes([permissions.AllowAny])
 def login(request):
     """
     POSTs to nyumbani core with phone number and default password.
@@ -29,44 +30,38 @@ def login(request):
 
     data = serializer.validated_data
 
-    phone_number = data.get('phone_number')
-    password = data.get('password')
+    phone_number = data.get("phone_number")
+    password = data.get("password")
 
-    response = requests.post(
-        f'{settings.NYUMBANI_LOGIN_URL}',
-        json={
-            'phone_number': phone_number,
-            'password': password
-        }
-    )
+    # response = requests.post(
+    #     f"{settings.NYUMBANI_LOGIN_URL}",
+    #     json={"phone_number": phone_number, "password": password},
+    # )
 
-    response_serializer = NyumbaniUserSerializer(data=response.json())
-    response_serializer.is_valid(raise_exception=True)
-    response_data = response_serializer.validated_data
+    # response_serializer = NyumbaniUserSerializer(data=response.json())
+    # response_serializer.is_valid(raise_exception=True)
+    # response_data = response_serializer.validated_data
 
-    password_reset_at = response_data.get('password_reset_at')
-    
-    if password_reset_at:
-        return response.Response(
-            {
-                'message': 'Password reset required',
-                'user': response_data
-            },
-            status=status.HTTP_400_BAD_REQUEST
-        )
-    
+    # password_reset_at = response_data.get("password_reset_at")
+
+    # if password_reset_at:
+    #     return response.Response(
+    #         {"message": "Password reset required", "user": response_data},
+    #         status=status.HTTP_400_BAD_REQUEST,
+    #     )
+
     user = authenticate(username=phone_number, password=password)
     if user is not None:
         token, _ = Token.objects.get_or_create(user=user)
         user_serializer = UserSerializer(user)
         user_data = user_serializer.data
-        user_data['token'] = token.key
+        user_data["token"] = token.key
         return response.Response(user_data, status=status.HTTP_200_OK)
     else:
         return response.Response(status=status.HTTP_401_UNAUTHORIZED)
-    
 
-@api_view(['POST'])
+
+@api_view(["POST"])
 def password_reset(request):
     """
     POSTs to nyumbani core with phone number and new password.
@@ -78,15 +73,12 @@ def password_reset(request):
 
     data = serializer.validated_data
 
-    phone_number = data.get('phone_number')
-    password = data.get('password')
+    phone_number = data.get("phone_number")
+    password = data.get("password")
 
     response = requests.post(
-        f'{settings.NYUMBANI_PASSWORD_RESET_URL}',
-        json={
-            'phone_number': phone_number,
-            'password': password
-        }
+        f"{settings.NYUMBANI_PASSWORD_RESET_URL}",
+        json={"phone_number": phone_number, "password": password},
     )
 
     response_serializer = NyumbaniUserSerializer(data=response.json())

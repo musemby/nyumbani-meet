@@ -1,4 +1,4 @@
-FROM python:3.6.9
+FROM python:3.9
 ENV PYTHONUNBUFFERED 1
 ENV DEBUG 1
 RUN apt-get update &&\

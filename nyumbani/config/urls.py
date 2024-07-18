@@ -13,24 +13,27 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+
 
 def trigger_error(request):
     division_by_zero = 1 / 0
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
     # path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
-    path('api-auth/', include('rest_framework.urls')),
-    path('auth/', include('users.urls')),
-    path('authorization/', include('djoser.urls')),
-    path('authorization/', include('djoser.urls.authtoken')),
-    path('common/', include('common.urls')),
-    path('sentry-debug/', trigger_error),
+    path("api-auth/", include("rest_framework.urls")),
+    path("auth/", include("users.urls")),
+    path("authorization/", include("djoser.urls")),
+    path("authorization/", include("djoser.urls.authtoken")),
+    path("common/", include("common.urls")),
+    path("sentry-debug/", trigger_error),
+    path("bookings/", include("bookings.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

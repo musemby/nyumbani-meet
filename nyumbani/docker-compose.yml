@@ -7,16 +7,27 @@ services:
     image: mdillon/postgis:10
     ports:
       - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
 
   web:
     build: .
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8070"
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/src
     ports:
-      - "7171:7171"
+      - "8000:8000"
     depends_on:
       - pg
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST=pg
+      - DATABASE_URL=postgis://postgres:postgres@pg:5432/postgres
+
+volumes:
+  pgdata:
 
 # TODO - automate pg users and db creation
 # create role sasdef with password 'sasdef_pass'
