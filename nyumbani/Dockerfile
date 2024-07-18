@@ -14,5 +14,4 @@ COPY . /app
 # give permissions to run_server.sh
 RUN chmod +x /app/run_server.sh
 
-
-CMD ["/app/run_server.sh"]
+ENTRYPOINT ["sh", "/app/run_server.sh"]
