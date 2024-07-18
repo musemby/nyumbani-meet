@@ -12,7 +12,7 @@ RUN pip install -r requirements.txt
 COPY . /app
 
 # give permissions to run_server.sh
-RUN chmod +x /app/nyumbani/run_server.sh
+RUN chmod +x /app/run_server.sh
 
 
-CMD ["/app/nyumbani/run_server.sh"]
+CMD ["/app/run_server.sh"]
