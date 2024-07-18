@@ -11,6 +11,8 @@ RUN pip install -r requirements.txt
 
 COPY . /app
 
-CMD python manage.py collectstatic --no-input -v 3
-CMD python manage.py migrate
-CMD gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 8 config.config.wsgi
+# give permissions to run_server.sh
+RUN chmod +x /app/nyumbani/run_server.sh
+
+
+CMD ["/app/nyumbani/run_server.sh"]
