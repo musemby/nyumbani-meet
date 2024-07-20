@@ -28,7 +28,7 @@ class Room(AbstractOrganizationModel):
 
 
 class Booking(AbstractOrganizationModel):
-    room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True, blank=True)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True)
     booked_by = models.ForeignKey(
         User, null=True, blank=True, on_delete=models.SET_NULL, related_name="bookings"
     )

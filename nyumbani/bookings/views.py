@@ -14,7 +14,14 @@ class BookingApi(APIView):
     class BookingsListApiSerializer(serializers.ModelSerializer):
         class Meta:
             model = Booking
-            fields = ["start_time", "end_time", "description", "organization", "room"]
+            fields = [
+                "start_time",
+                "end_time",
+                "description",
+                "organization",
+                "room",
+                "id",
+            ]
 
 
 class BookingsListApi(BookingApi):
@@ -49,12 +56,12 @@ class RoomApi(APIView):
     class RoomsListApiSerializer(serializers.ModelSerializer):
         class Meta:
             model = Room
-            fields = ["name", "number", "building", "capacity", "description"]
+            fields = ["name", "number", "building", "capacity", "description", "id"]
 
     class RoomsCreateApiSerializer(serializers.ModelSerializer):
         class Meta:
             model = Room
-            fields = ["name", "number", "capacity", "description"]
+            fields = ["name", "description"]
 
 
 class RoomsListApi(RoomApi):
@@ -75,8 +82,8 @@ class RoomsCreateApi(RoomApi):
 
         room = Room.objects.create(
             name=serializer.validated_data["name"],
-            number=serializer.validated_data["number"],
-            capacity=serializer.validated_data["capacity"],
+            # number=serializer.validated_data["number"],
+            # capacity=serializer.validated_data["capacity"],
             description=serializer.validated_data["description"],
             organization=organization,
             building=Building.objects.filter(organization=organization).first(),
