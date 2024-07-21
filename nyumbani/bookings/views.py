@@ -52,6 +52,20 @@ class BookingsCreateApi(BookingApi):
         return Response(data=output_serializer.data)
 
 
+class BookingsDeleteApi(BookingApi):
+    def delete(self, request, pk):
+        if not Booking.objects.filter(
+            pk=pk,
+            organization=request.user.get_or_create_organization(),
+            booked_by=request.user,
+        ).exists():
+            return Response(status=404)
+
+        booking = Booking.objects.get(pk=pk)
+        booking.delete()
+        return Response(status=204)
+
+
 class RoomApi(APIView):
     class RoomsListApiSerializer(serializers.ModelSerializer):
         class Meta:
