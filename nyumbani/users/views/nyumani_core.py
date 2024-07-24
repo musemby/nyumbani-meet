@@ -45,8 +45,8 @@ def login(request):
     response_data = response_serializer.validated_data
 
     password_reset_at = response_data.get('password_reset_at')
-    
-    if password_reset_at:
+
+    if not password_reset_at:
         return response.Response(
             {
                 'message': 'Password reset required',

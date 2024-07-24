@@ -17,6 +17,16 @@ class Restaurant(AbstractOrganizationModel):
 
 
 class Menu(AbstractOrganizationModel):
+
+    """
+        - user
+         - menu on the sidebar. 
+         - on click, download pdf
+        - admin
+         - list of menus
+         - activate/deactivate a menu
+         - upload a new menu
+    """
     
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)

@@ -31,12 +31,27 @@ class Room(AbstractOrganizationModel):
 
 class Booking(AbstractOrganizationModel):
 
+    """
+    - can book 24 hours prior to the start time
+    - user
+        - view meeting rooms
+        - view calendar for a meeting room
+        - book a meeting room
+        - view bookings(past, active and future)
+
+    - admin to have similar view to user but with additional actions:
+        - list all meeting rooms
+            - list of bookings
+            - calendar view
+        - list all bookings(past, active and future)
+    """
+
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     booked_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='bookings')
     booked_on = models.DateTimeField(auto_now_add=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     description = models.TextField(null=True, blank=True)
-    
+
     def __str__(self):
         return self.room.name

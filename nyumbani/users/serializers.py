@@ -94,6 +94,7 @@ class NyumbaniUserSerializer(serializers.Serializer):
     phone_number = serializers.CharField()
     house_number = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     email = serializers.EmailField(allow_blank=True, allow_null=True, required=False)
+    role = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     gender = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     occupation = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     id_number = serializers.CharField(allow_blank=True, allow_null=True, required=False)

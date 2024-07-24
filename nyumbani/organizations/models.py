@@ -10,6 +10,7 @@ class Organization(AbstractBase):
     phone_number = models.CharField(max_length=15, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL, related_name='child_organizations')
 
     def __str__(self):
         return self.name
