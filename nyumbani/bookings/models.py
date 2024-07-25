@@ -38,4 +38,9 @@ class Booking(AbstractOrganizationModel):
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return self.room.name
+        room_name = self.room.name if self.room else "No Room"
+        booked_by_name = self.booked_by.name if self.booked_by else "No User"
+        start_time = self.start_time.strftime("%Y-%m-%d %H:%M:%S")
+        end_time = self.end_time.strftime("%Y-%m-%d %H:%M:%S")
+        return f"{room_name} - {booked_by_name} - {start_time} - {end_time}"
+    
