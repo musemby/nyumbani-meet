@@ -1,4 +1,8 @@
 from django.contrib import admin
 
-admin.autodiscover()
 # Register your models here.
+
+from .models import Organization, UserOrganization
+
+admin.site.register(Organization)
+admin.site.register(UserOrganization)
