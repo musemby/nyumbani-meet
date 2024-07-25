@@ -27,6 +27,8 @@ class BookingApi(APIView):
             ]
 
         def get_room_name(self, obj):
+            if obj.room is None:
+                return None
             return obj.room.name
 
 

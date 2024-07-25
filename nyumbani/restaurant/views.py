@@ -91,6 +91,8 @@ class MenuApi(APIView):
             ]
 
         def get_restaurant_name(self, obj):
+            if obj.restaurant is None:
+                return None
             return obj.restaurant.name
 
 
