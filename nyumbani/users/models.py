@@ -82,6 +82,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def is_admin(self):
         return self.is_staff
+    
+    def __str__(self) -> str:
+        return f"{self.name} - {self.phone_number}"
 
 
 class NyumbaniUserSession(models.Model):

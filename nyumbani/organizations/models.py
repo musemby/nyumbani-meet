@@ -23,3 +23,6 @@ class AbstractOrganizationModel(AbstractBase):
 
 class UserOrganization(AbstractOrganizationModel):
     user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return f"{self.user.name} - {self.organization.name}"
