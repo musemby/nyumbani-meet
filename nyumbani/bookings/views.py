@@ -72,6 +72,28 @@ class BookingsDeleteApi(BookingApi):
         return Response(status=204)
 
 
+class BookingsUpdateApi(BookingApi):
+    def put(self, request, pk):
+        if not Booking.objects.filter(
+            pk=pk,
+            organization=request.user.get_or_create_organization(),
+            booked_by=request.user,
+        ).exists():
+            return Response(status=404)
+
+        serializer = self.BookingsCreateApiSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        booking = Booking.objects.get(pk=pk)
+        booking.start_time = serializer.validated_data["start_time"]
+        booking.end_time = serializer.validated_data["end_time"]
+        booking.description = serializer.validated_data["description"]
+        booking.save()
+
+        output_serializer = self.BookingsListApiSerializer(booking)
+        return Response(data=output_serializer.data)
+
+
 class RoomApi(APIView):
     class RoomsListApiSerializer(serializers.ModelSerializer):
         class Meta:
