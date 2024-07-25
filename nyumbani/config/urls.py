@@ -34,6 +34,7 @@ urlpatterns = [
     path("common/", include("common.urls")),
     path("sentry-debug/", trigger_error),
     path("bookings/", include("bookings.urls")),
+    path("restaurants/", include("restaurant.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "users",
     "organizations",
     "bookings",
+    "restaurant",
 ]
 
 MIDDLEWARE = [
