@@ -12,6 +12,8 @@ class BookingApi(APIView):
             fields = ["start_time", "end_time", "description", "room"]
 
     class BookingsListApiSerializer(serializers.ModelSerializer):
+        room_name = serializers.SerializerMethodField()
+
         class Meta:
             model = Booking
             fields = [
@@ -20,8 +22,12 @@ class BookingApi(APIView):
                 "description",
                 "organization",
                 "room",
+                "room_name",
                 "id",
             ]
+
+        def get_room_name(self, obj):
+            return obj.room.name
 
 
 class BookingsListApi(BookingApi):

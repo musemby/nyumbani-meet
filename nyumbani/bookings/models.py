@@ -43,4 +43,3 @@ class Booking(AbstractOrganizationModel):
         start_time = self.start_time.strftime("%Y-%m-%d %H:%M:%S")
         end_time = self.end_time.strftime("%Y-%m-%d %H:%M:%S")
         return f"{room_name} - {booked_by_name} - {start_time} - {end_time}"
-    

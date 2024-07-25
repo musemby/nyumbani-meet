@@ -26,3 +26,6 @@ class UserOrganization(AbstractOrganizationModel):
 
     def __str__(self) -> str:
         return f"{self.user.name} - {self.organization.name}"
+
+    class Meta:
+        unique_together = ("user", "organization")
