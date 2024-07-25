@@ -13,7 +13,7 @@ class Organization(AbstractBase):
     def __str__(self):
         return self.name
 
-
+     
 class AbstractOrganizationModel(AbstractBase):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
 

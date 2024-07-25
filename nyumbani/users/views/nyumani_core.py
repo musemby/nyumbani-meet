@@ -19,10 +19,11 @@ def login(request):
     """
     POSTs to nyumbani core with phone number and default password.
     Nyumbani returns user details and token.
-    If the `password_reset_at` field is not None, the user is redirected to the password reset page.
+    If the `reset_password` field is True, the user is redirected to the password reset page.
+    Password reset page POSTs to Nyumbani password reset endpoint. Then redirects to our log in page(use new password).
     Otherwise, the user is logged in and redirected to the app.
     Other Important details that Nyumbani returns are the roles of the user i.e Admin or Tenant
-    We then save these details on our end and authenticate the user on our system.
+    We then save these details on our end and authenticate the user on our system.5t33qw
     """
     data = request.data
     serializer = NyumbaniLoginSerializer(data=data)
