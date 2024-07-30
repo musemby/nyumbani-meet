@@ -6,6 +6,7 @@ from bookings.models import Booking, Building, Room
 
 from bookings.services import send_booking_created_notification
 from users.models import User
+import django_filters
 
 
 class BookingApi(APIView):
@@ -18,6 +19,9 @@ class BookingApi(APIView):
 
     class BookingsListApiSerializer(serializers.ModelSerializer):
         room_name = serializers.SerializerMethodField()
+        tenant_phone_number = serializers.SerializerMethodField()
+        tenant_name = serializers.SerializerMethodField()
+        tenant_house_number = serializers.SerializerMethodField()
 
         class Meta:
             model = Booking
@@ -29,6 +33,9 @@ class BookingApi(APIView):
                 "room",
                 "room_name",
                 "booked_by",
+                "tenant_phone_number",
+                "tenant_name",
+                "tenant_house_number",
                 "id",
             ]
 
@@ -37,6 +44,31 @@ class BookingApi(APIView):
                 return None
             return obj.room.name
 
+        def get_tenant_phone_number(self, obj):
+            if obj.booked_by is None:
+                return None
+            return str(obj.booked_by.phone_number)
+
+        def get_tenant_name(self, obj):
+            if obj.booked_by is None:
+                return None
+            return obj.booked_by.name
+
+        def get_tenant_house_number(self, obj):
+            if obj.booked_by is None:
+                return None
+            return obj.booked_by.house_number
+
+    class BookingsFilter(django_filters.rest_framework.FilterSet):
+        class Meta:
+            model = Booking
+            fields = {
+                "room": ["exact", "in"],
+                "booked_by": ["exact", "in"],
+                "start_time": ["exact", "gt", "gte", "lt", "lte"],
+                "end_time": ["exact", "gt", "gte", "lt", "lte"],
+            }
+
 
 class BookingsListApi(BookingApi):
     def get(self, request):
@@ -44,7 +76,9 @@ class BookingsListApi(BookingApi):
             organization=request.user.get_or_create_organization()
         ).order_by("start_time")
 
-        output_serializer = self.BookingsListApiSerializer(bookings, many=True)
+        qs = self.BookingsFilter(request.query_params, queryset=bookings).qs
+
+        output_serializer = self.BookingsListApiSerializer(qs, many=True)
         return Response(data=output_serializer.data)
 
 
