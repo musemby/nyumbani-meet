@@ -6,11 +6,18 @@ from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import response, permissions, serializers, status
+from users.models import User
 from users.serializers import (
     NyumbaniUserSerializer,
     NyumbaniLoginSerializer,
     UserSerializer,
 )
+
+
+@api_view(["POST"])
+def logout(request):
+    Token.objects.filter(user=request.user).delete()
+    return response.Response(status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
@@ -51,7 +58,11 @@ def login(request):
     #         status=status.HTTP_400_BAD_REQUEST,
     #     )
 
-    user = authenticate(username=phone_number, password=password)
+    # user = authenticate(username=phone_number,
+    #                      password=password)
+
+    user = User.objects.get(phone_number=phone_number)
+
     if user is not None:
         token, _ = Token.objects.get_or_create(user=user)
         user_serializer = UserSerializer(user)

@@ -12,6 +12,8 @@ class UserApi(APIView):
             model = User
             fields = [
                 "phone_number",
+                "name",
+                "house_number",
                 "is_staff",
                 "is_admin",
                 "id",

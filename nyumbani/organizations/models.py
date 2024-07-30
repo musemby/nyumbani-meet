@@ -13,7 +13,7 @@ class Organization(AbstractBase):
     def __str__(self):
         return self.name
 
-     
+
 class AbstractOrganizationModel(AbstractBase):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
 
@@ -23,6 +23,7 @@ class AbstractOrganizationModel(AbstractBase):
 
 class UserOrganization(AbstractOrganizationModel):
     user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    is_admin = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return f"{self.user.name} - {self.organization.name}"

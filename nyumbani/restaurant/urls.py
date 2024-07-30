@@ -8,6 +8,8 @@ from .views import (
     MenuCreateApi,
     MenuDeleteApi,
     MenuUpdateApi,
+    MenuActiveRenderApi,
+    MenuSetActiveApi,
 )
 
 urlpatterns = [
@@ -29,4 +31,10 @@ urlpatterns = [
     path("menus/create/", MenuCreateApi.as_view(), name="menus_create"),
     path("menus/<uuid:pk>/delete/", MenuDeleteApi.as_view(), name="menus_delete"),
     path("menus/<uuid:pk>/update/", MenuUpdateApi.as_view(), name="menus_update"),
+    path("menus/active/render/", MenuActiveRenderApi.as_view(), name="menus_active"),
+    path(
+        "menus/active/<uuid:pk>/set/",
+        MenuSetActiveApi.as_view(),
+        name="menus_set_active",
+    ),
 ]

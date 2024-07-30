@@ -14,6 +14,7 @@ router = DefaultRouter()
 urlpatterns = [
     path("nyumani_core/login/", views.login, name="login"),
     path("nyumani_core/password_reset/", views.password_reset, name="password_reset"),
+    path("nyumani_core/logout/", views.logout, name="logout"),
     path("users/", UsersListApi.as_view(), name="users_list"),
     path("users/<str:pk>/", UsersDetailApi.as_view(), name="users_detail"),
 ]

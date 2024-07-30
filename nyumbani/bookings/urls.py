@@ -6,6 +6,9 @@ from .views import (
     RoomsCreateApi,
     BookingsDeleteApi,
     BookingsUpdateApi,
+    BuildingsListApi,
+    BuildingsCreateApi,
+    BuildingsDeleteApi,
 )
 
 urlpatterns = [
@@ -23,4 +26,11 @@ urlpatterns = [
     ),
     path("rooms/", RoomsListApi.as_view(), name="rooms_list"),
     path("rooms/create/", RoomsCreateApi.as_view(), name="rooms_create"),
+    path("buildings/", BuildingsListApi.as_view(), name="buildings_list"),
+    path("buildings/create/", BuildingsCreateApi.as_view(), name="buildings_create"),
+    path(
+        "buildings/<uuid:pk>/delete/",
+        BuildingsDeleteApi.as_view(),
+        name="buildings_delete",
+    ),
 ]
