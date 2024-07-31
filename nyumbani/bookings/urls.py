@@ -2,6 +2,7 @@ from django.urls import path
 from .views import (
     BookingsListApi,
     BookingsCreateApi,
+    DashboardApi,
     RoomsListApi,
     RoomsCreateApi,
     BookingsDeleteApi,
@@ -12,6 +13,7 @@ from .views import (
 )
 
 urlpatterns = [
+    path("dashboard/", DashboardApi.as_view(), name="dashboard"),
     path("bookings/", BookingsListApi.as_view(), name="bookings_list"),
     path("bookings/create/", BookingsCreateApi.as_view(), name="bookings_create"),
     path(

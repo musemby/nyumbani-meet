@@ -8,6 +8,9 @@ from bookings.services import send_booking_created_notification
 from users.models import User
 import django_filters
 
+from django.utils import timezone
+from datetime import timedelta
+
 
 class BookingApi(APIView):
     class BookingsCreateApiSerializer(serializers.ModelSerializer):
@@ -145,6 +148,56 @@ class BookingsUpdateApi(BookingApi):
 
         output_serializer = self.BookingsListApiSerializer(booking)
         return Response(data=output_serializer.data)
+
+
+class DashboardApi(BookingApi):
+    class FiltersSerializer(serializers.Serializer):
+        start_time = serializers.DateTimeField(required=False)
+        end_time = serializers.DateTimeField(required=False)
+
+    def get(self, request):
+        # filters
+        filters_serializer = self.FiltersSerializer(data=request.query_params)
+        filters_serializer.is_valid(raise_exception=True)
+
+        # time
+        now = timezone.now()
+        start_of_This_month = now.replace(
+            day=1, hour=0, minute=0, second=0, microsecond=0
+        )
+        end_of_This_month = start_of_This_month + timedelta(days=31)
+        start_time = filters_serializer.validated_data.get(
+            "start_time", start_of_This_month
+        )
+        end_time = filters_serializer.validated_data.get("end_time", end_of_This_month)
+
+        # bookings
+        bookings = Booking.objects.filter(
+            organization=request.user.get_or_create_organization(),
+            start_time__gte=start_time,
+            end_time__lte=end_time,
+        )
+        upcoming_bookings = bookings.filter(start_time__gte=now)
+
+        # analytics
+        bookings_count = bookings.count()
+        past_bookings_count = bookings.filter(start_time__lte=now).count()
+        upcoming_bookings_count = bookings.filter(end_time__gte=now).count()
+        ongoing_bookings_count = bookings.filter(
+            start_time__lte=now, end_time__gte=now
+        ).count()
+
+        response_data = {
+            "past_bookings_count": past_bookings_count,
+            "upcoming_bookings_count": upcoming_bookings_count,
+            "ongoing_bookings_count": ongoing_bookings_count,
+            "bookings_count": bookings_count,
+            "upcoming_bookings": self.BookingsListApiSerializer(
+                upcoming_bookings, many=True
+            ).data,
+        }
+
+        return Response(status=200, data=response_data)
 
 
 class RoomApi(APIView):
