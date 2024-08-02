@@ -40,29 +40,32 @@ def login(request):
 
     data = serializer.validated_data
 
-    phone_number = data.get("phone_number")
+    phone_number = data.get("phone_number").replace('+', '')
     password = data.get("password")
 
     nyumbani_response = requests.post(
         f"{settings.NYUMBANI_LOGIN_URL}",
         json={"phone_number": phone_number, "password": password},
     )
-    # import pdb; pdb.set_trace()
 
-    message = nyumbani_response.json()['data']['message']
+    message = "An error occurred while logging in. Please try again later."
 
     if nyumbani_response.status_code != 200:
         return response.Response(
             {"message": message}, status=response.status_code
         )
-    
+    message = nyumbani_response.json()['data']['message']
+
+    house_no = None
     payload = nyumbani_response.json()['data']['payload']
     metadata = payload['meta_data']
-    house_no = metadata['house']['house_no']
-    reset_password = metadata['reset_password']
     role = metadata['role']
+    if role == 'tenant':
+        house_no = metadata['house']['house_no']
+
+    reset_password = metadata['reset_password']
     organization = payload['organization']
-    sub_organization = metadata['sub_organization']
+    sub_organization = metadata.get('sub_organization')
     nyumbani_token = payload['token']
     user = payload['user']
     
@@ -89,26 +92,29 @@ def login(request):
 
     organization, _ = Organization.objects.get_or_create(
         name=organization['name'],
-        user=user
     )
-    sub_organization, _ = Organization.objects.get_or_create(
-        name=sub_organization['name'],
+    if sub_organization:
+        sub_organization, _ = Organization.objects.get_or_create(
+            name=sub_organization['name'],
+            parent=organization
+        )
+    user_org, _ = UserOrganization.objects.get_or_create(
         user=user,
-        parent=organization
+        organization=organization,
+        defaults={
+            'is_admin':True if role == 'admin' else False
+        }
     )
-    UserOrganization.objects.get_or_create(
-        user=user,
-        organization=organization 
-    )
+    import pdb; pdb.set_trace()
     NyumbaniUserSession.objects.create(
         user=user,
         nyumbani_token=nyumbani_token
     )
 
-    # user = authenticate(username=phone_number,
-    #                      password=password)
+    user = authenticate(username=phone_number,
+                         password=password)
 
-    user = User.objects.get(phone_number=phone_number)
+    # user = User.objects.get(phone_number=phone_number)
 
     if user is not None:
         token, _ = Token.objects.get_or_create(user=user)
