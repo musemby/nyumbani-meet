@@ -40,12 +40,17 @@ def login(request):
 
     data = serializer.validated_data
 
-    phone_number = data.get("phone_number").replace('+', '')
+    phone_number = data.get("phone_number", "")
+    if phone_number:
+        if not phone_number.startswith('+'):
+            phone_number = '+' + phone_number
+        stripped_phone_number = phone_number[1:]  # Remove the leading '+'
+        
     password = data.get("password")
 
     nyumbani_response = requests.post(
         f"{settings.NYUMBANI_LOGIN_URL}",
-        json={"phone_number": phone_number, "password": password},
+        json={"phone_number": stripped_phone_number, "password": password},
     )
 
     message = "An error occurred while logging in. Please try again later."
@@ -84,7 +89,7 @@ def login(request):
         "nyumbani_user_id": user['id'],
     }
     user, _ = User.objects.get_or_create(
-        phone_number=user['phone_number'],
+        phone_number=phone_number,
         defaults=defaults
     )
     user.set_password(password)
@@ -106,7 +111,9 @@ def login(request):
         }
     )
 
-    NyumbaniUserSession.objects.create(
+    import pdb; pdb.set_trace()
+
+    NyumbaniUserSession.objects.get_or_create(
         user=user,
         nyumbani_token=nyumbani_token
     )
