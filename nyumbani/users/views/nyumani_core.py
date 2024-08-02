@@ -5,12 +5,15 @@ from django.contrib.auth import authenticate
 
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework import response, permissions, serializers, status
+from rest_framework import permissions, serializers, status
+from rest_framework.response import Response
 from users.serializers import (
     NyumbaniUserSerializer,
     NyumbaniLoginSerializer,
     UserSerializer,
 )
+from users.models import User, NyumbaniUserSession
+from organizations.models import Organization, UserOrganization
 
 
 @api_view(["POST"])
@@ -34,22 +37,67 @@ def login(request):
     phone_number = data.get("phone_number")
     password = data.get("password")
 
-    # response = requests.post(
-    #     f"{settings.NYUMBANI_LOGIN_URL}",
-    #     json={"phone_number": phone_number, "password": password},
-    # )
+    response = requests.post(
+        f"{settings.NYUMBANI_LOGIN_URL}",
+        json={"phone_number": phone_number, "password": password},
+    )
+    # import pdb; pdb.set_trace()
 
-    # response_serializer = NyumbaniUserSerializer(data=response.json())
-    # response_serializer.is_valid(raise_exception=True)
-    # response_data = response_serializer.validated_data
+    message = response.json()['data']['message']
 
-    # password_reset_at = response_data.get("password_reset_at")
+    if response.status_code != 200:
+        return Response(
+            {"message": message}, status=response.status_code
+        )
+    
+    payload = response.json()['data']['payload']
+    metadata = payload['meta_data']
+    house_no = metadata['house']['house_no']
+    reset_password = metadata['reset_password']
+    role = metadata['role']
+    organization = payload['organization']
+    sub_organization = metadata['sub_organization']
+    nyumbani_token = payload['token']
+    user = payload['user']
+    
+    if reset_password:
+        return Response(
+            {"message": "Password reset required"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
-    # if password_reset_at:
-    #     return response.Response(
-    #         {"message": "Password reset required", "user": response_data},
-    #         status=status.HTTP_400_BAD_REQUEST,
-    #     )
+    # create user 
+    defaults = {
+        "name": user['name'],
+        "email": user['email'],
+        "house_number": house_no,
+        "nyumbani_role": role,
+        "nyumbani_user_id": user['id'],
+    }
+    user, _ = User.objects.get_or_create(
+        phone_number=user['phone_number'],
+        defaults=defaults
+    )
+    user.set_password(password)
+    user.save()
+
+    organization, _ = Organization.objects.get_or_create(
+        name=organization['name'],
+        user=user
+    )
+    sub_organization, _ = Organization.objects.get_or_create(
+        name=sub_organization['name'],
+        user=user,
+        parent=organization
+    )
+    UserOrganization.objects.get_or_create(
+        user=user,
+        organization=organization 
+    )
+    NyumbaniUserSession.objects.create(
+        user=user,
+        nyumbani_token=nyumbani_token
+    )
 
     user = authenticate(username=phone_number, password=password)
     if user is not None:
@@ -57,9 +105,9 @@ def login(request):
         user_serializer = UserSerializer(user)
         user_data = user_serializer.data
         user_data["token"] = token.key
-        return response.Response(user_data, status=status.HTTP_200_OK)
+        return Response(user_data, status=status.HTTP_200_OK)
     else:
-        return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
 @api_view(["POST"])
