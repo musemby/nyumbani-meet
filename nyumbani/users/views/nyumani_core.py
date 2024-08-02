@@ -105,7 +105,7 @@ def login(request):
             'is_admin':True if role == 'admin' else False
         }
     )
-    import pdb; pdb.set_trace()
+
     NyumbaniUserSession.objects.create(
         user=user,
         nyumbani_token=nyumbani_token
