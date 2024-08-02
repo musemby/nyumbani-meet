@@ -12,6 +12,8 @@ from users.serializers import (
     NyumbaniLoginSerializer,
     UserSerializer,
 )
+from users.models import User, NyumbaniUserSession
+from organizations.models import Organization, UserOrganization
 
 
 @api_view(["POST"])
@@ -41,22 +43,67 @@ def login(request):
     phone_number = data.get("phone_number")
     password = data.get("password")
 
-    # response = requests.post(
-    #     f"{settings.NYUMBANI_LOGIN_URL}",
-    #     json={"phone_number": phone_number, "password": password},
-    # )
+    nyumbani_response = requests.post(
+        f"{settings.NYUMBANI_LOGIN_URL}",
+        json={"phone_number": phone_number, "password": password},
+    )
+    # import pdb; pdb.set_trace()
 
-    # response_serializer = NyumbaniUserSerializer(data=response.json())
-    # response_serializer.is_valid(raise_exception=True)
-    # response_data = response_serializer.validated_data
+    message = nyumbani_response.json()['data']['message']
 
-    # password_reset_at = response_data.get("password_reset_at")
+    if nyumbani_response.status_code != 200:
+        return response.Response(
+            {"message": message}, status=response.status_code
+        )
+    
+    payload = nyumbani_response.json()['data']['payload']
+    metadata = payload['meta_data']
+    house_no = metadata['house']['house_no']
+    reset_password = metadata['reset_password']
+    role = metadata['role']
+    organization = payload['organization']
+    sub_organization = metadata['sub_organization']
+    nyumbani_token = payload['token']
+    user = payload['user']
+    
+    if reset_password:
+        return response.Response(
+            {"message": "Password reset required"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
-    # if password_reset_at:
-    #     return response.Response(
-    #         {"message": "Password reset required", "user": response_data},
-    #         status=status.HTTP_400_BAD_REQUEST,
-    #     )
+    # create user 
+    defaults = {
+        "name": user['name'],
+        "email": user['email'],
+        "house_number": house_no,
+        "nyumbani_role": role,
+        "nyumbani_user_id": user['id'],
+    }
+    user, _ = User.objects.get_or_create(
+        phone_number=user['phone_number'],
+        defaults=defaults
+    )
+    user.set_password(password)
+    user.save()
+
+    organization, _ = Organization.objects.get_or_create(
+        name=organization['name'],
+        user=user
+    )
+    sub_organization, _ = Organization.objects.get_or_create(
+        name=sub_organization['name'],
+        user=user,
+        parent=organization
+    )
+    UserOrganization.objects.get_or_create(
+        user=user,
+        organization=organization 
+    )
+    NyumbaniUserSession.objects.create(
+        user=user,
+        nyumbani_token=nyumbani_token
+    )
 
     # user = authenticate(username=phone_number,
     #                      password=password)
@@ -88,12 +135,12 @@ def password_reset(request):
     phone_number = data.get("phone_number")
     password = data.get("password")
 
-    response = requests.post(
+    nyumbani_response = requests.post(
         f"{settings.NYUMBANI_PASSWORD_RESET_URL}",
         json={"phone_number": phone_number, "password": password},
     )
 
-    response_serializer = NyumbaniUserSerializer(data=response.json())
+    response_serializer = NyumbaniUserSerializer(data=nyumbani_response.json())
     response_serializer.is_valid(raise_exception=True)
     response_data = response_serializer.validated_data
 

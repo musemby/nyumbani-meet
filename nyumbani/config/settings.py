@@ -444,5 +444,5 @@ PLACE_HOLDER_PRODUCT_IMG_URL = os.getenv("PLACE_HOLDER_PRODUCT_IMG_URL", "url")
 # ###########################################
 
 NYUMBANI_CORE_URL = os.getenv("NYUMBANI_CORE_URL", "http://localhost:4000")
-NYUMBANI_LOGIN_URL = f"{NYUMBANI_CORE_URL}/api/v1/login/"
-NYUMBANI_PASSWORD_RESET_URL = f"{NYUMBANI_CORE_URL}/api/v1/password-reset/"
+NYUMBANI_LOGIN_URL = f"{NYUMBANI_CORE_URL}/auth/login/"
+NYUMBANI_PASSWORD_RESET_URL = f"{NYUMBANI_CORE_URL}/auth/change-password/"

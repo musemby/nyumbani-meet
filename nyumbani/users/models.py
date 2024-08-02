@@ -60,6 +60,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     id_number = models.CharField(max_length=255, null=True, blank=True)
     kra_pin = models.CharField(max_length=255, null=True, blank=True)
     password_reset_at = models.DateTimeField(null=True, blank=True)
+    nyumbani_user_id = models.CharField(max_length=255, null=True, blank=True)
     nyumbani_role = models.CharField(max_length=255, null=True, blank=True)
     nyumbani_active = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
@@ -75,7 +76,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         if UserOrganization.objects.filter(user=self).exists():
             return UserOrganization.objects.get(user=self).organization
 
-        org = Organization.objects.create(name="Default Organization Name")
+        org = Organization.objects.create(name=f"{self.name}'s Organization")
         UserOrganization.objects.create(user=self, organization=org)
         return org
 
@@ -92,7 +93,7 @@ class NyumbaniUserSession(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="nyumbani_user_sessions"
     )
-    nyumbani_token = models.CharField(max_length=255, null=True, blank=True)
+    nyumbani_token = models.CharField(max_length=255 , null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
