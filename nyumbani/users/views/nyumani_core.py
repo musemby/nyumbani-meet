@@ -2,10 +2,13 @@ import requests
 
 from django.conf import settings
 from django.contrib.auth import authenticate
+from django.core.exceptions import ValidationError
 
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import response, permissions, serializers, status
+
+from common.utils import parse_and_format_phone_number
 from users.models import User
 from users.serializers import (
     NyumbaniUserSerializer,
@@ -41,11 +44,15 @@ def login(request):
     data = serializer.validated_data
 
     phone_number = data.get("phone_number", "")
-    if phone_number:
-        if not phone_number.startswith('+'):
-            phone_number = '+' + phone_number
-        stripped_phone_number = phone_number[1:]  # Remove the leading '+'
-        
+    try:
+        phone_number = parse_and_format_phone_number(phone_number)
+    except ValidationError as e:
+        return response.Response(
+            {"message": f"Invalid phone number: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    stripped_phone_number = phone_number[1:]  # Remove the leading '+'
+
     password = data.get("password")
 
     nyumbani_response = requests.post(
@@ -103,15 +110,13 @@ def login(request):
             name=sub_organization['name'],
             parent=organization
         )
-    user_org, _ = UserOrganization.objects.get_or_create(
+    UserOrganization.objects.get_or_create(
         user=user,
         organization=organization,
         defaults={
             'is_admin':True if role == 'admin' else False
         }
     )
-
-    import pdb; pdb.set_trace()
 
     NyumbaniUserSession.objects.get_or_create(
         user=user,
@@ -120,8 +125,6 @@ def login(request):
 
     user = authenticate(username=phone_number,
                          password=password)
-
-    # user = User.objects.get(phone_number=phone_number)
 
     if user is not None:
         token, _ = Token.objects.get_or_create(user=user)
