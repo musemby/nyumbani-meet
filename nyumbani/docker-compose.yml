@@ -11,15 +11,10 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   web:
-<<<<<<< HEAD
     build:
       context: .
       dockerfile: Dockerfile.local
     command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-=======
-    build: .
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000 --reload"
->>>>>>> f3a6a91c63f4d528c718c0a68353cf2b31418e82
     volumes:
       - .:/app
     ports:
