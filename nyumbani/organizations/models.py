@@ -25,7 +25,7 @@ class AbstractOrganizationModel(AbstractBase):
 
 
 class UserOrganization(AbstractOrganizationModel):
-    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    user = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name="organizations")
     is_admin = models.BooleanField(default=False)
 
     def __str__(self) -> str:

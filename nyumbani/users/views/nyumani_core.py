@@ -14,6 +14,7 @@ from users.serializers import (
     NyumbaniUserSerializer,
     NyumbaniLoginSerializer,
     UserSerializer,
+    NyumbaniPasswordResetSerializer,
 )
 from users.models import User, NyumbaniUserSession
 from organizations.models import Organization, UserOrganization
@@ -61,15 +62,17 @@ def login(request):
     )
 
     message = "An error occurred while logging in. Please try again later."
-
+    # import pdb; pdb.set_trace()
     if nyumbani_response.status_code != 200:
         return response.Response(
-            {"message": message}, status=response.status_code
+            {"message": message}, status=status.HTTP_400_BAD_REQUEST
         )
-    message = nyumbani_response.json()['data']['message']
-
+    
+    nyumbani_response_data = nyumbani_response.json()['data']
+    message = nyumbani_response_data['message']
+    
     house_no = None
-    payload = nyumbani_response.json()['data']['payload']
+    payload = nyumbani_response_data['payload']
     metadata = payload['meta_data']
     role = metadata['role']
     if role == 'tenant':
@@ -80,12 +83,6 @@ def login(request):
     sub_organization = metadata.get('sub_organization')
     nyumbani_token = payload['token']
     user = payload['user']
-    
-    if reset_password:
-        return response.Response(
-            {"message": "Password reset required"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
 
     # create user 
     defaults = {
@@ -118,22 +115,28 @@ def login(request):
         }
     )
 
-    NyumbaniUserSession.objects.get_or_create(
+    NyumbaniUserSession.objects.update_or_create(
         user=user,
-        nyumbani_token=nyumbani_token
+        defaults={
+            "nyumbani_token": nyumbani_token,
+        }
     )
 
     user = authenticate(username=phone_number,
                          password=password)
 
-    if user is not None:
-        token, _ = Token.objects.get_or_create(user=user)
-        user_serializer = UserSerializer(user)
-        user_data = user_serializer.data
-        user_data["token"] = token.key
-        return response.Response(user_data, status=status.HTTP_200_OK)
-    else:
+    if user is None:
         return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+    
+    token, _ = Token.objects.get_or_create(user=user)
+    user_serializer = UserSerializer(user)
+    user_data = user_serializer.data
+    user_data["token"] = token.key
+    if reset_password:
+        user_data['reset_password'] = True
+
+    return response.Response(user_data, status=status.HTTP_200_OK)
+    
 
 
 @api_view(["POST"])
@@ -142,22 +145,47 @@ def password_reset(request):
     POSTs to nyumbani core with phone number and new password.
     Nyumbani core updates the password and returns an updated user object.
     """
-    data = request.data
-    serializer = NyumbaniLoginSerializer(data=data)
-    serializer.is_valid(raise_exception=True)
+    user = request.user
+    auth_token = request.auth
 
+    data = request.data
+    serializer = NyumbaniPasswordResetSerializer(data=data)
+    serializer.is_valid(raise_exception=True)
+ 
     data = serializer.validated_data
 
-    phone_number = data.get("phone_number")
-    password = data.get("password")
+    current_password = data.get("current_password")
+    new_password = data.get("new_password")
+    new_password_confirmation = data.get("new_password_confirmation")
+
+    try:
+        nyumbani_session = NyumbaniUserSession.objects.get(user=user)
+    except NyumbaniUserSession.DoesNotExist:
+        return response.Response(
+            {"message": "No nyumbani session found"}, status=status.HTTP_404_NOT_FOUND
+        )
+
+    nyumbani_token = nyumbani_session.nyumbani_token
+    headers = {"Authorization": f"Bearer {nyumbani_token}"}
 
     nyumbani_response = requests.post(
         f"{settings.NYUMBANI_PASSWORD_RESET_URL}",
-        json={"phone_number": phone_number, "password": password},
+        headers=headers,
+        json={
+            "current_password": current_password,
+            "new_password": new_password,
+            "new_password_confirmation": new_password_confirmation,
+        }
     )
+    if nyumbani_response.status_code != 200:
+        return response.Response(
+            {"message": "An error occurred while resetting password. Please try again later."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    data = nyumbani_response.json()
 
-    response_serializer = NyumbaniUserSerializer(data=nyumbani_response.json())
-    response_serializer.is_valid(raise_exception=True)
-    response_data = response_serializer.validated_data
-
-    return response.Response(response_data, status=status.HTTP_200_OK)
+    user.set_password(new_password)
+    user.save()
+    
+    return response.Response(data, status=status.HTTP_200_OK)

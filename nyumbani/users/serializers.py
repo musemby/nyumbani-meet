@@ -86,6 +86,12 @@ class NyumbaniLoginSerializer(serializers.Serializer):
     password = serializers.CharField()
 
 
+class NyumbaniPasswordResetSerializer(serializers.Serializer):
+    current_password = serializers.CharField()
+    new_password = serializers.CharField()
+    new_password_confirmation = serializers.CharField()
+
+
 class NyumbaniUserSerializer(serializers.Serializer):
     name = serializers.CharField()
     phone_number = serializers.CharField()
