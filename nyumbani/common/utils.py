@@ -1,7 +1,28 @@
 import csv
 import datetime
 
-from openpyxl import Workbook
+from phonenumbers import parse, format_number, PhoneNumberFormat, is_valid_number
+from phonenumbers.phonenumberutil import NumberParseException
+from django.core.exceptions import ValidationError
+
+
+def parse_and_format_phone_number(phone_number):
+    regions_to_try = ['KE', None]
+    
+    for region in regions_to_try:
+        try:
+            parsed_number = parse(phone_number, region)
+            
+            if is_valid_number(parsed_number):
+                # Format the number in E.164 format (with '+' prefix)
+                e164_format = format_number(parsed_number, PhoneNumberFormat.E164)
+                
+                # Remove the '+' sign from the beginning
+                return e164_format
+        except NumberParseException:
+            continue
+
+    raise ValidationError("Invalid phone number")
 
 
 def is_weekend(date):
@@ -10,18 +31,6 @@ def is_weekend(date):
 
 def is_weekday(date):
     return True if date.weekday() < 5 else False
-
-
-def convert_csv_to_xlsx(file_path):
-    wb = Workbook()
-    ws = wb.active
-    with open(file_path, 'r') as f:
-        for row in csv.reader(f):
-            ws.append(row)
-    name = file_path.split('.')[0]
-    xlsx_path = f'{name}.xlsx'
-    wb.save(f'{xlsx_path}')
-    return xlsx_path
 
 
 def create_csv(file_path, header_row, data_rows):

@@ -86,6 +86,12 @@ class NyumbaniLoginSerializer(serializers.Serializer):
     password = serializers.CharField()
 
 
+class NyumbaniPasswordResetSerializer(serializers.Serializer):
+    current_password = serializers.CharField()
+    new_password = serializers.CharField()
+    new_password_confirmation = serializers.CharField()
+
+
 class NyumbaniUserSerializer(serializers.Serializer):
     name = serializers.CharField()
     phone_number = serializers.CharField()
@@ -100,3 +106,10 @@ class NyumbaniUserSerializer(serializers.Serializer):
     id_number = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     kra_pin = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     password_reset_at = serializers.DateTimeField(allow_null=True, required=True)
+
+
+class NyumbaniLoginResponseSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    phone_number = serializers.CharField()
+    house_number = serializers.CharField()
+    email = serializers

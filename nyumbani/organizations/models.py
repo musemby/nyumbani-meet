@@ -9,6 +9,9 @@ class Organization(AbstractBase):
     phone_number = models.CharField(max_length=15, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    parent = models.ForeignKey(
+        "self", on_delete=models.CASCADE, related_name='sub_organizations', null=True, blank=True
+    )
 
     def __str__(self):
         return self.name
@@ -22,7 +25,7 @@ class AbstractOrganizationModel(AbstractBase):
 
 
 class UserOrganization(AbstractOrganizationModel):
-    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    user = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name="organizations")
     is_admin = models.BooleanField(default=False)
 
     def __str__(self) -> str:

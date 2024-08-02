@@ -48,3 +48,5 @@ data_files/
 mediafiles/
 
 random_notes.py
+staticfiles/
+.DS_Store
