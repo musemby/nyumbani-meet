@@ -55,17 +55,20 @@ def login(request):
     stripped_phone_number = phone_number[1:]  # Remove the leading '+'
 
     password = data.get("password")
-
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
     nyumbani_response = requests.post(
         f"{settings.NYUMBANI_LOGIN_URL}",
         json={"phone_number": stripped_phone_number, "password": password},
+        headers=headers
     )
 
-    message = "An error occurred while logging in. Please try again later."
-    # import pdb; pdb.set_trace()
     if nyumbani_response.status_code != 200:
+        nyumbani_response_error = nyumbani_response.json()
         return response.Response(
-            {"message": message}, status=status.HTTP_400_BAD_REQUEST
+            nyumbani_response_error, status=status.HTTP_400_BAD_REQUEST
         )
     
     nyumbani_response_data = nyumbani_response.json()['data']
@@ -136,7 +139,6 @@ def login(request):
         user_data['reset_password'] = True
 
     return response.Response(user_data, status=status.HTTP_200_OK)
-    
 
 
 @api_view(["POST"])
@@ -166,8 +168,11 @@ def password_reset(request):
         )
 
     nyumbani_token = nyumbani_session.nyumbani_token
-    headers = {"Authorization": f"Bearer {nyumbani_token}"}
-
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": f"Bearer {nyumbani_token}",
+    }
     nyumbani_response = requests.post(
         f"{settings.NYUMBANI_PASSWORD_RESET_URL}",
         headers=headers,
@@ -177,10 +182,11 @@ def password_reset(request):
             "new_password_confirmation": new_password_confirmation,
         }
     )
+    print(nyumbani_response.content)
     if nyumbani_response.status_code != 200:
+        nyumbani_response_error = nyumbani_response.json()
         return response.Response(
-            {"message": "An error occurred while resetting password. Please try again later."},
-            status=status.HTTP_400_BAD_REQUEST
+            nyumbani_response_error, status=status.HTTP_400_BAD_REQUEST
         )
     
     data = nyumbani_response.json()
