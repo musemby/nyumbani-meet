@@ -162,9 +162,7 @@ class MenuActiveRenderApi(MenuApi):
             organization=request.user.get_or_create_organization(), is_active_menu=True
         )
 
-        serializer = self.MenuListApiSerializer(menu)
-
-        return Response(data=serializer.data)
+        return Response(status=302, headers={"Location": menu.file.url})
 
 
 class MenuDeleteApi(MenuApi):
