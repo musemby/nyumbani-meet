@@ -83,7 +83,28 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def is_admin(self):
         return self.is_staff
-    
+
+    def is_organization_admin(self, organization):
+        from organizations.models import UserOrganization
+
+        org = organization
+        parent_org = org.parent
+
+        if UserOrganization.objects.filter(
+            user=self, organization=org, is_admin=True
+        ).exists():
+            return True
+
+        if (
+            parent_org
+            and UserOrganization.objects.filter(
+                user=self, organization=parent_org, is_admin=True
+            ).exists()
+        ):
+            return True
+
+        return False
+
     def __str__(self) -> str:
         return f"{self.name} - {self.phone_number}"
 
@@ -93,7 +114,7 @@ class NyumbaniUserSession(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="nyumbani_user_sessions"
     )
-    nyumbani_token = models.CharField(max_length=255 , null=True, blank=True)
+    nyumbani_token = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
