@@ -4,9 +4,9 @@ services:
   pg:
     environment:
       POSTGRES_HOST_AUTH_METHOD: "trust"
-    image: postgres:15-alpine3.20
+    image: mdillon/postgis:10
     ports:
-      - "5436:5432"
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -21,11 +21,10 @@ services:
       - "8000:8000"
     depends_on:
       - pg
-    stdin_open: true
-    tty: true
     env_file:
       - .env
+    environment:
+      - DATABASE_URL=postgis://postgres:postgres@pg:5432/postgres
 
 volumes:
   pgdata:
-
