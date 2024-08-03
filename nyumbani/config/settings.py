@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     # 'ckeditor',
     # local
     "common",
+    # "comms",
     "users",
     "organizations",
     "bookings",
@@ -300,6 +301,11 @@ BUNICOM_SMS_DELIVERY_REPORT_URL = os.getenv(
 BUNICOM_API_KEY = os.getenv("BUNICOM_API_KEY", "KIFUNGUO")
 BUNICOM_SHORTCODE = os.getenv("BUNICOM_SHORTCODE", "BuniComSMS")
 BUNICOM_PARTNER_ID = os.getenv("BUNICOM_PARTNER_ID", "8678")
+
+# Zeptomail
+ZEPTO_MAIL_URL = os.getenv("ZEPTO_MAIL_URL", "https://zeptomail.zoho.com/v1.1/email")
+ZEPTO_MAIL_AUTH_KEY = os.getenv("ZEPTO_MAIL_AUTH_KEY", "key")
+
 
 # partners
 PARTNERS = {
