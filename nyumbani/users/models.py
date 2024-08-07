@@ -74,7 +74,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         from organizations.models import Organization, UserOrganization
 
         if UserOrganization.objects.filter(user=self).exists():
-            return UserOrganization.objects.get(user=self).organization
+            return UserOrganization.objects.first(user=self).organization
 
         org = Organization.objects.create(name=f"{self.name}'s Organization")
         UserOrganization.objects.create(user=self, organization=org)
