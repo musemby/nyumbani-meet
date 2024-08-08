@@ -3,9 +3,9 @@ import logging
 import requests
 
 from django.conf import settings
+from common.utils import parse_and_format_phone_number
 
 LOGGER = logging.getLogger('__name__')
-
 
 
 def send_sms_to_console(message, recipients):
@@ -16,12 +16,13 @@ def send_sms_to_console(message, recipients):
 
 def send_bunicom_sms(message, recipients, time_to_send=None):
     for recipient in recipients:
+        parsed_recipient = recipient.as_e164
         data = {
             "apikey": settings.BUNICOM_API_KEY,
             "partnerID": settings.BUNICOM_PARTNER_ID,
             "message": message,
             "shortcode": settings.BUNICOM_SHORTCODE,
-            "mobile": recipient
+            "mobile": parsed_recipient,
         }
         if time_to_send:
             data['timeToSend'] = time_to_send # Unix timestamp

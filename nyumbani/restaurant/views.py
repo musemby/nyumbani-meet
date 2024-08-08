@@ -89,6 +89,7 @@ class MenuApi(APIView):
                 "id",
                 "restaurant_name",
                 "is_active_menu",
+                "organization",
             ]
 
         def get_restaurant_name(self, obj):
