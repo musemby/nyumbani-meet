@@ -116,11 +116,13 @@ class BookingsCreateApi(BookingApi):
 
 class BookingsDeleteApi(BookingApi):
     def delete(self, request, pk):
-        if not Booking.objects.filter(
+        bookings = Booking.objects.filter(
             pk=pk,
             organization=request.user.get_or_create_organization(),
             booked_by=request.user,
-        ).exists():
+        )
+        import pdb; pdb.set_trace()
+        if not bookings.exists():
             return Response(status=404)
 
         booking = Booking.objects.get(pk=pk)

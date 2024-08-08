@@ -61,5 +61,4 @@ def send_booking_created_sms(booking_id: str):
 
 
 def send_booking_created_notification(booking_id: str):
-    send_booking_created_email(booking_id)
     send_booking_created_sms(booking_id)
