@@ -61,6 +61,7 @@ class BookingApi(APIView):
             if obj.booked_by is None:
                 return None
             return obj.booked_by.house_number
+    
 
     class BookingsFilter(django_filters.rest_framework.FilterSet):
         class Meta:
@@ -216,6 +217,8 @@ class RoomApi(APIView):
                 "description",
                 "id",
                 "building_name",
+                "operates_from",
+                "operates_to",
             ]
 
         def get_building_name(self, obj):
@@ -232,6 +235,8 @@ class RoomApi(APIView):
                 "description",
                 "building",
                 "capacity",
+                "operates_from",
+                "operates_to",
             ]
 
 
@@ -256,6 +261,8 @@ class RoomsCreateApi(RoomApi):
             number=serializer.validated_data.get("number", None),
             capacity=serializer.validated_data.get("capacity", None),
             description=serializer.validated_data.get("description", None),
+            operates_from=serializer.validated_data.get("operates_from", None),
+            operates_to=serializer.validated_data.get("operates_to", None),
             organization=organization,
             building=serializer.validated_data.get("building", None),
         )
