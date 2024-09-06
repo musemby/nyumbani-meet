@@ -9,6 +9,8 @@ from users.models import User
 class UserApi(APIView):
     class UsersListApiSerializer(serializers.ModelSerializer):
         is_admin = serializers.SerializerMethodField()
+        organization_name = serializers.SerializerMethodField()
+        building_name = serializers.SerializerMethodField()
 
         class Meta:
             model = User
@@ -19,6 +21,8 @@ class UserApi(APIView):
                 "is_staff",
                 "is_admin",
                 "id",
+                "organization_name",
+                "building_name",
             ]
 
         def get_is_admin(self, obj: User):
@@ -41,6 +45,31 @@ class UserApi(APIView):
                 return False
 
             return request_user.is_organization_admin(request_org)
+        
+        def get_organization_name(self, obj: User):
+            # import pdb; pdb.set_trace()
+            if self.context.get("request_user") is None:
+                return None
+
+            request_user = self.context["request_user"]
+            request_org = request_user.get_or_create_organization()
+
+            if request_user.id != obj.id:
+                return None
+                
+            return request_org.name
+        
+        def get_building_name(self, obj: User):
+            if self.context.get("request_user") is None:
+                return None
+
+            request_user = self.context["request_user"]
+            request_org = request_user.get_or_create_organization()
+
+            building = request_org.building_set.first()
+            return building.name if building else None
+
+            
 
 
 class UsersListApi(UserApi):
@@ -60,5 +89,5 @@ class UsersListApi(UserApi):
 class UsersDetailApi(UserApi):
     def get(self, request, pk=None):
         user = User.objects.get(pk=request.user.id if pk is None or pk == "me" else pk)
-        output_serializer = self.UsersListApiSerializer(user)
+        output_serializer = self.UsersListApiSerializer(user, context={"request_user": request.user})
         return Response(data=output_serializer.data)
