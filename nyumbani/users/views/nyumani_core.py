@@ -60,80 +60,80 @@ def login(request):
     stripped_phone_number = phone_number[1:]  # Remove the leading '+'
 
     password = data.get("password")
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-    }
-    nyumbani_response = requests.post(
-        f"{settings.NYUMBANI_LOGIN_URL}",
-        json={"phone_number": stripped_phone_number, "password": password},
-        headers=headers
-    )
+    # headers = {
+    #     "Content-Type": "application/json",
+    #     "Accept": "application/json",
+    # }
+    # nyumbani_response = requests.post(
+    #     f"{settings.NYUMBANI_LOGIN_URL}",
+    #     json={"phone_number": stripped_phone_number, "password": password},
+    #     headers=headers
+    # )
 
-    if nyumbani_response.status_code != 200:
-        nyumbani_response_error = nyumbani_response.json()
-        logger.error(nyumbani_response_error)
-        return response.Response(
-            nyumbani_response_error, status=status.HTTP_400_BAD_REQUEST
-        )
+    # if nyumbani_response.status_code != 200:
+    #     nyumbani_response_error = nyumbani_response.json()
+    #     logger.error(nyumbani_response_error)
+    #     return response.Response(
+    #         nyumbani_response_error, status=status.HTTP_400_BAD_REQUEST
+    #     )
     
-    nyumbani_response_data = nyumbani_response.json()['data']
-    message = nyumbani_response_data['message']
+    # nyumbani_response_data = nyumbani_response.json()['data']
+    # message = nyumbani_response_data['message']
     
-    house_no = None
-    payload = nyumbani_response_data['payload']
-    metadata = payload['meta_data']
-    role = metadata['role']
-    if role == 'tenant':
-        house_no = metadata['house']['house_no']
+    # house_no = None
+    # payload = nyumbani_response_data['payload']
+    # metadata = payload['meta_data']
+    # role = metadata['role']
+    # if role == 'tenant':
+    #     house_no = metadata['house']['house_no']
 
-    reset_password = metadata['reset_password']
-    organization = payload['organization']
-    sub_organization = metadata.get('sub_organization')
-    nyumbani_token = payload['token']
-    user = payload['user']
+    # reset_password = metadata['reset_password']
+    # organization = payload['organization']
+    # sub_organization = metadata.get('sub_organization')
+    # nyumbani_token = payload['token']
+    # user = payload['user']
 
-    # create user 
-    defaults = {
-        "name": user['name'],
-        "email": user['email'],
-        "house_number": house_no,
-        "nyumbani_role": role,
-        "nyumbani_user_id": user['id'],
-    }
-    user, _ = User.objects.update_or_create(
-        phone_number=phone_number,
-        defaults=defaults
-    )
-    user.set_password(password)
-    user.save()
-    org_defaults = {
-        "name": organization['name'],
-    }
-    organization, _ = Organization.objects.update_or_create(
-        nyumbani_organization_id=organization['id'],
-        defaults=org_defaults
-    )
-    if sub_organization:
-        sub_organization, _ = Organization.objects.update_or_create(
-            nyumbani_organization_id=organization['id'],
-            parent=organization,
-            defaults=org_defaults
-        )
-    UserOrganization.objects.get_or_create(
-        user=user,
-        organization=organization,
-        defaults={
-            'is_admin':True if role == 'admin' else False
-        }
-    )
+    # # create user 
+    # defaults = {
+    #     "name": user['name'],
+    #     "email": user['email'],
+    #     "house_number": house_no,
+    #     "nyumbani_role": role,
+    #     "nyumbani_user_id": user['id'],
+    # }
+    # user, _ = User.objects.update_or_create(
+    #     phone_number=phone_number,
+    #     defaults=defaults
+    # )
+    # user.set_password(password)
+    # user.save()
+    # org_defaults = {
+    #     "name": organization['name'],
+    # }
+    # organization, _ = Organization.objects.update_or_create(
+    #     nyumbani_organization_id=organization['id'],
+    #     defaults=org_defaults
+    # )
+    # if sub_organization:
+    #     sub_organization, _ = Organization.objects.update_or_create(
+    #         nyumbani_organization_id=organization['id'],
+    #         parent=organization,
+    #         defaults=org_defaults
+    #     )
+    # UserOrganization.objects.get_or_create(
+    #     user=user,
+    #     organization=organization,
+    #     defaults={
+    #         'is_admin':True if role == 'admin' else False
+    #     }
+    # )
 
-    NyumbaniUserSession.objects.update_or_create(
-        user=user,
-        defaults={
-            "nyumbani_token": nyumbani_token,
-        }
-    )
+    # NyumbaniUserSession.objects.update_or_create(
+    #     user=user,
+    #     defaults={
+    #         "nyumbani_token": nyumbani_token,
+    #     }
+    # )
 
     user = authenticate(username=phone_number,
                          password=password)
@@ -145,8 +145,8 @@ def login(request):
     user_serializer = UserSerializer(user)
     user_data = user_serializer.data
     user_data["token"] = token.key
-    if reset_password:
-        user_data['reset_password'] = True
+    # if reset_password:
+    #     user_data['reset_password'] = True
 
     return response.Response(user_data, status=status.HTTP_200_OK)
 
