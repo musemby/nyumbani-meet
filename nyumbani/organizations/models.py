@@ -12,6 +12,7 @@ class Organization(AbstractBase):
     parent = models.ForeignKey(
         "self", on_delete=models.CASCADE, related_name='sub_organizations', null=True, blank=True
     )
+    nyumbani_organization_id = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.name

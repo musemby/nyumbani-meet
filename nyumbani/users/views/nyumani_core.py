@@ -1,4 +1,5 @@
 import requests
+import logging
 
 from django.conf import settings
 from django.contrib.auth import authenticate
@@ -18,6 +19,8 @@ from users.serializers import (
 )
 from users.models import User, NyumbaniUserSession
 from organizations.models import Organization, UserOrganization
+
+logger = logging.getLogger(__name__)
 
 
 @api_view(["POST"])
@@ -48,8 +51,10 @@ def login(request):
     try:
         phone_number = parse_and_format_phone_number(phone_number)
     except ValidationError as e:
+        message = f"Invalid phone number: {str(e)}"
+        logger.error(message)
         return response.Response(
-            {"message": f"Invalid phone number: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST
+            {"message": message}, status=status.HTTP_400_BAD_REQUEST
         )
     
     stripped_phone_number = phone_number[1:]  # Remove the leading '+'
@@ -67,6 +72,7 @@ def login(request):
 
     if nyumbani_response.status_code != 200:
         nyumbani_response_error = nyumbani_response.json()
+        logger.error(nyumbani_response_error)
         return response.Response(
             nyumbani_response_error, status=status.HTTP_400_BAD_REQUEST
         )
@@ -95,20 +101,24 @@ def login(request):
         "nyumbani_role": role,
         "nyumbani_user_id": user['id'],
     }
-    user, _ = User.objects.get_or_create(
+    user, _ = User.objects.update_or_create(
         phone_number=phone_number,
         defaults=defaults
     )
     user.set_password(password)
     user.save()
-
-    organization, _ = Organization.objects.get_or_create(
-        name=organization['name'],
+    org_defaults = {
+        "name": organization['name'],
+    }
+    organization, _ = Organization.objects.update_or_create(
+        nyumbani_organization_id=organization['id'],
+        defaults=org_defaults
     )
     if sub_organization:
-        sub_organization, _ = Organization.objects.get_or_create(
-            name=sub_organization['name'],
-            parent=organization
+        sub_organization, _ = Organization.objects.update_or_create(
+            nyumbani_organization_id=organization['id'],
+            parent=organization,
+            defaults=org_defaults
         )
     UserOrganization.objects.get_or_create(
         user=user,
