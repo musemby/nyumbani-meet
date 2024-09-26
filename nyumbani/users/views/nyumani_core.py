@@ -92,7 +92,6 @@ def login(request):
     sub_organization = metadata.get('sub_organization')
     nyumbani_token = payload['token']
     user = payload['user']
-    import pdb; pdb.set_trace()
 
     # create user 
     defaults = {
