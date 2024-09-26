@@ -116,7 +116,7 @@ def login(request):
     )
     if sub_organization:
         sub_organization, _ = Organization.objects.update_or_create(
-            nyumbani_organization_id=organization['id'],
+            nyumbani_organization_id=sub_organization['id'],
             parent=org_obj,
             defaults=org_defaults
         )
