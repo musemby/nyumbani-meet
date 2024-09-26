@@ -285,6 +285,40 @@ DEFAULT_MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles/")
 MEDIA_ROOT = os.getenv("MEDIA_ROOT", DEFAULT_MEDIA_ROOT)
 MEDIA_URL = "/media/"
 
+# AWS settings
+AWS_ACCESS_KEY_ID =  os.getenv('AWS_ACCESS_KEY_ID', '')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', '')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_REGION = os.getenv('AWS_REGION', 'eu-west-1')
+
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com'
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+AWS_STATIC_LOCATION = 'static'
+AWS_MEDIA_LOCATION = 'media'
+AWS_REGION_SES_REGION = 'eu-central-1'
+
+
+if ENVIRONMENT == 'PRODUCTION':
+    STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_STATIC_LOCATION)
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    DEFAULT_FILE_STORAGE = 'config.storage_backends.MediaStorage'
+
+    MEDIA_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_MEDIA_LOCATION)
+else:
+    default_static_root = os.path.join(BASE_DIR, 'staticfiles')
+    STATIC_ROOT = os.getenv('STATIC_ROOT', default_static_root)
+    STATIC_URL = '/static/'
+    STATICFILES_DIRS = (
+        os.path.join(BASE_DIR, 'static'),
+    )
+
+    DEFAULT_MEDIA_ROOT = os.path.join(BASE_DIR, 'mediafiles/')
+    MEDIA_ROOT = os.getenv('MEDIA_ROOT', DEFAULT_MEDIA_ROOT)
+    MEDIA_URL = '/media/'
+
+
 GDAL_LIBRARY_PATH = os.environ.get("GDAL_LIBRARY_PATH")
 GEOS_LIBRARY_PATH = os.environ.get("GEOS_LIBRARY_PATH")
 
@@ -402,12 +436,6 @@ TOOKAN_CREATE_TASK_URL = os.getenv("TOOKAN_CREATE_TASK_URL", "create_task")
 # admin SMS numbers
 admin_nos = os.getenv("ADMIN_PHONE_NUMBERS", "254718893693")
 ADMIN_PHONE_NUMBERS = admin_nos.split(",")
-
-AWS_SERVER_PUBLIC_KEY = os.getenv("AWS_SERVER_PUBLIC_KEY", "kiii")
-AWS_SERVER_SECRET_KEY = os.getenv("AWS_SERVER_SECRET_KEY", "sikret")
-AWS_REGION_NAME = os.getenv("AWS_REGION_NAME", "rijon")
-AWS_TEXT_ROLE_ARN = os.getenv("AWS_TEXT_ROLE_ARN", "arnadaone")
-AWS_DOCSEE_BUCKET = os.getenv("AWS_DOCSEE_BUCKET", "docsee")
 
 # firebase supabase
 SUPABASE_BASE_URL = os.getenv("SUPABASE_BASE_URL", "supabase.io")
