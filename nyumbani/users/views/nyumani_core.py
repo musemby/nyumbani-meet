@@ -110,14 +110,14 @@ def login(request):
     org_defaults = {
         "name": organization['name'],
     }
-    organization, _ = Organization.objects.update_or_create(
+    org_obj, _ = Organization.objects.update_or_create(
         nyumbani_organization_id=organization['id'],
         defaults=org_defaults
     )
     if sub_organization:
         sub_organization, _ = Organization.objects.update_or_create(
             nyumbani_organization_id=organization['id'],
-            parent=organization,
+            parent=org_obj,
             defaults=org_defaults
         )
     UserOrganization.objects.get_or_create(
