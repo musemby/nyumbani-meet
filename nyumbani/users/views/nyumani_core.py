@@ -122,7 +122,7 @@ def login(request):
         )
     UserOrganization.objects.get_or_create(
         user=user,
-        organization=organization,
+        organization=org_obj,
         defaults={
             'is_admin':True if role == 'admin' else False
         }
