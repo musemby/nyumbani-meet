@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import serializers
+from rest_framework import serializers, permissions
 
 from .models import Restaurant, Menu
 
@@ -158,10 +158,11 @@ class MenuSetActiveApi(MenuApi):
 
 
 class MenuActiveRenderApi(MenuApi):
+    permission_classes = [permissions.AllowAny,]
     def get(self, request):
-        menu = Menu.objects.get(
-            organization=request.user.get_or_create_organization(), is_active_menu=True
-        )
+        menu = Menu.objects.filter(
+            is_active_menu=True
+        ).first()
 
         return Response(status=302, headers={"Location": menu.file.url})
 
